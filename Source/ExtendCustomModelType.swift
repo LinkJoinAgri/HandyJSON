@@ -234,6 +234,7 @@ extension _ExtendCustomModelType {
         for (key, property) in properties {
             var realKey = key
             var realValue = property.0
+            var useNullValueIfNeeded = false
 
             if let info = property.1 {
                 if info.bridged, let _value = (instance as! NSObject).value(forKey: key) {
@@ -242,6 +243,10 @@ extension _ExtendCustomModelType {
 
                 if mapper.propertyExcluded(key: Int(bitPattern: info.address)) {
                     continue
+                }
+
+                if mapper.propertyPresentNullValue(key: Int(bitPattern: info.address)) {
+                    useNullValueIfNeeded = true
                 }
 
                 if let mappingHandler = mapper.getMappingHandler(key: Int(bitPattern: info.address)) {
@@ -257,6 +262,10 @@ extension _ExtendCustomModelType {
                         }
                         continue
                     }
+                }
+                else if useNullValueIfNeeded {
+                    dict[realKey] = NSNull()
+                    continue
                 }
             }
 
